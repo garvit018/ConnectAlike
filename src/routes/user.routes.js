@@ -13,7 +13,7 @@ const router = Router();
 router.route("/register").post(
   upload.fields([
     {
-      name: "coverImage",
+      name: "image",
       maxCount: 1,
     },
   ]),

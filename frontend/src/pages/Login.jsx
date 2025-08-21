@@ -10,6 +10,7 @@ import {
   Chrome,
   Facebook,
 } from "lucide-react";
+import axios from "axios";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,11 +22,14 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    username: "",
     confirmPassword: "",
     fullName: "",
   });
 
   const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState(null);
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -50,6 +54,9 @@ const Login = () => {
     else if (formData.password.length < 6)
       newErrors.password = "Password must be at least 6 characters";
 
+    if (!isLogin && !formData.username)
+      newErrors.username = "Username is required";
+
     if (!isLogin) {
       if (!formData.fullName) newErrors.fullName = "Full name is required";
       if (!formData.confirmPassword)
@@ -57,19 +64,52 @@ const Login = () => {
       else if (formData.password !== formData.confirmPassword)
         newErrors.confirmPassword = "Passwords do not match";
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
-
+    if (!validateForm()) {
+      return;
+    }
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLoading(false);
+    setMessage("");
+    try {
+      const endpoint = isLogin
+        ? "http://localhost:8000/api/v1/users/login"
+        : "http://localhost:8000/api/v1/users/register";
 
-    console.log(isLogin ? "Login successful" : "Signup successful", formData);
+      const loggiinn = isLogin
+        ? { email: formData.email, password: formData.password }
+        : {
+            fullName: formData.fullName,
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+          };
+
+      const res = await axios.post(endpoint, loggiinn, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      });
+      console.log("Success:", res.data);
+      setMessage(
+        res.data.message ||
+          (isLogin ? "Login successful!" : "Registered successful!")
+      );
+      setStatus("success");
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+    } catch (err) {
+      console.error("Error:", err.response?.data || err.message);
+      setMessage(err.response?.data?.error || "Something went wrong");
+      setStatus("error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (field, value) => {
@@ -79,10 +119,18 @@ const Login = () => {
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
-    setFormData({ email: "", password: "", confirmPassword: "", fullName: "" });
+    setFormData({
+      email: "",
+      password: "",
+      confirmPassword: "",
+      fullName: "",
+      username: "",
+    });
     setErrors({});
     setShowPassword(false);
     setShowConfirmPassword(false);
+    setMessage("");
+    setStatus(null);
   };
 
   const passwordStrength = !isLogin
@@ -142,6 +190,7 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (
               <div className="space-y-2">
+                {/* Full Name */}
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
@@ -151,11 +200,32 @@ const Login = () => {
                     onChange={(e) =>
                       handleInputChange("fullName", e.target.value)
                     }
-                    className={`w-full bg-white/10 border ${errors.fullName ? "border-red-500" : "border-white/20"} text-white placeholder-gray-400 py-4 pl-12 pr-4 rounded-xl focus:outline-none`}
+                    className={`w-full bg-white/10 border ${
+                      errors.fullName ? "border-red-500" : "border-white/20"
+                    } text-white placeholder-gray-400 py-4 pl-12 pr-4 rounded-xl focus:outline-none`}
                   />
                 </div>
                 {errors.fullName && (
                   <p className="text-red-400 text-sm">{errors.fullName}</p>
+                )}
+
+                {/* Username */}
+                <div className="relative mt-4">
+                  <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Username"
+                    value={formData.username}
+                    onChange={(e) =>
+                      handleInputChange("username", e.target.value)
+                    }
+                    className={`w-full bg-white/10 border ${
+                      errors.username ? "border-red-500" : "border-white/20"
+                    } text-white placeholder-gray-400 py-4 pl-12 pr-4 rounded-xl focus:outline-none`}
+                  />
+                </div>
+                {errors.username && (
+                  <p className="text-red-400 text-sm">{errors.username}</p>
                 )}
               </div>
             )}
@@ -296,6 +366,15 @@ const Login = () => {
                 </>
               )}
             </button>
+            {message && (
+              <div
+                className={`mt-4 text-center text-sm font-medium ${
+                  status === "success" ? "text-green-400" : "text-red-400"
+                }`}
+              >
+                {message}
+              </div>
+            )}
           </form>
 
           {/* Toggle Auth */}

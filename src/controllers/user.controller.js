@@ -58,7 +58,7 @@ const registerUser = asyncHandler(async (req, res) => {
     image: imageUrl,
     email,
     password,
-    username: username.toLowerCase(),
+    username: username?username.toLowerCase():undefined,
   });
 
   const createdUser = await User.findById(user._id).select(
@@ -112,8 +112,8 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: true,
-    sameSite: "strict",
+    // secure: true,
+    // sameSite: "strict",
   };
 
   return res
@@ -139,7 +139,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: true,
+    // secure: true,
     sameSite: "strict",
   };
 
@@ -181,7 +181,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     const options = {
       httpOnly: true,
-      secure: true,
+      // secure: true,
     };
 
     return res

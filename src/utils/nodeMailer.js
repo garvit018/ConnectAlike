@@ -17,7 +17,7 @@ export const sendMail = async (to, subject, text) => {
       to,
       subject,
       text,
-      html: "<b>Hello User, we are happy that you joined our family. Kind Regards, FilmTeam.</b>",
+      html: "<b>Hello User, we are happy that you joined our family. Kind Regards, MovieMate.</b>",
     });
 
     console.log("Message sent:", info.messageId);

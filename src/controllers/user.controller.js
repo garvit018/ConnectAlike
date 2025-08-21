@@ -285,5 +285,6 @@ export {
   changeCurrentPassword,
   getCurrentUser,
   updateAccountDetails,
+  generateAccessandRefreshToken,
   updateUserImage,
 };

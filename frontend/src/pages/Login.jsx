@@ -158,15 +158,18 @@ const Login = () => {
 
           {/* Social Login */}
           <div className="space-y-3 mb-6">
-            <button className="w-full flex items-center justify-center gap-3 bg-black text-white hover:bg-gray-700 py-3 px-4 rounded-xl transition-all duration-200 shadow">
+            <button className="w-full flex items-center justify-center gap-3 bg-black text-white hover:bg-gray-800 py-3 px-4 rounded-xl transition-all duration-200 shadow">
               <Github className="w-5 h-5" />
               <span>Continue with GitHub</span>
             </button>
             <div className="flex gap-3">
-              <button className="flex-1 flex items-center justify-center gap-2 bg-black text-white hover:bg-gray-700 py-3 px-4 rounded-xl transition-all duration-200 shadow">
+              <a
+                href="http://localhost:8000/api/v1/users/google"
+                className="flex-1 flex items-center justify-center gap-2 bg-black text-white hover:bg-gray-800 py-3 px-4 rounded-xl transition-all duration-200 shadow"
+              >
                 <Chrome className="w-4 h-4" />
                 <span className="text-sm">Google</span>
-              </button>
+              </a>
               <button className="flex-1 flex items-center justify-center gap-2 bg-black text-white hover:bg-gray-800 py-3 px-4 rounded-xl transition-all duration-200 shadow">
                 <Facebook className="w-4 h-4" />
                 <span className="text-sm">Facebook</span>

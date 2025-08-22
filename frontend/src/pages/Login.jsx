@@ -70,6 +70,9 @@ const Login = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:8000/api/v1/users/google";
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -169,13 +172,16 @@ const Login = () => {
               <span>Continue with GitHub</span>
             </button>
             <div className="flex gap-3">
-              <a
-                href="http://localhost:8000/api/v1/users/google"
+              {/* <a */}
+              <button
+                onClick={handleGoogleLogin}
                 className="flex-1 flex items-center justify-center gap-2 bg-black text-white hover:bg-gray-800 py-3 px-4 rounded-xl transition-all duration-200 shadow"
               >
+                {/* > */}
                 <Chrome className="w-4 h-4" />
                 <span className="text-sm">Google</span>
-              </a>
+                {/* </a> */}
+              </button>
               <button className="flex-1 flex items-center justify-center gap-2 bg-black text-white hover:bg-gray-800 py-3 px-4 rounded-xl transition-all duration-200 shadow">
                 <Facebook className="w-4 h-4" />
                 <span className="text-sm">Facebook</span>

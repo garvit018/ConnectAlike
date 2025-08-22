@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import Header from "./Header";
-import Sidebar from "./Sidebar";
-import MovieCard from "./MovieCard";
+import Header from "./Header.jsx";
+import Sidebar from "./SideBar.jsx";
+import MovieCard from "./MovieCard.jsx";
 import { TrendingUp, Star, Clock } from "lucide-react";
 
 const Dashboard = () => {

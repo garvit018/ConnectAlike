@@ -11,8 +11,10 @@ import {
   Facebook,
 } from "lucide-react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -100,8 +102,12 @@ const Login = () => {
           (isLogin ? "Login successful!" : "Registered successful!")
       );
       setStatus("success");
-      if (res.data.token) {
-        localStorage.setItem("token", res.data.token);
+      const token = res.data?.data?.accessToken;
+
+      if (token) {
+        console.log("Token received:", token);
+        localStorage.setItem("token", token);
+        navigate("/dashboard");
       }
     } catch (err) {
       console.error("Error:", err.response?.data || err.message);

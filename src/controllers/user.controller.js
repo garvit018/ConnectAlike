@@ -4,6 +4,7 @@ import uploadOnCloudinary from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import { sendMail } from "../utils/nodemailer.util.js";
 
 /*
   Generate access Tokens
@@ -58,7 +59,7 @@ const registerUser = asyncHandler(async (req, res) => {
     image: imageUrl,
     email,
     password,
-    username: username?username.toLowerCase():undefined,
+    username: username ? username.toLowerCase() : undefined,
   });
 
   const createdUser = await User.findById(user._id).select(
@@ -68,6 +69,12 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!createdUser) {
     throw new ApiError(500, "Something went wrong while registering user");
   }
+
+  await sendMail(
+    createdUser.email,
+    "Welcome to MovieMate 🎬",
+    `Hello ${createdUser.fullName}, welcome to our family!`
+  );
 
   return res
     .status(201)

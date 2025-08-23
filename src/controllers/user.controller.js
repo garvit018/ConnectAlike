@@ -4,7 +4,7 @@ import uploadOnCloudinary from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
-import { sendMail } from "../utils/nodeMailer.js"
+import { sendMail } from "../utils/nodeMailer.js";
 // import SendmailTransport from "nodemailer/lib/sendmail-transport/index.js";
 
 /*
@@ -121,7 +121,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: false,
-    // sameSite: "strict",
+    sameSite: "lax",
   };
   await sendMail(
     user.email,
@@ -237,11 +237,16 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 /*
   Get Current User
 */
-const getCurrentUser = asyncHandler(async (req, res) => {
-  return res
-    .status(200)
-    .json(new ApiResponse(200, req.user, "Current user fetched successfully"));
-});
+const getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select(
+      "-password -refreshToken"
+    );
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch user", error });
+  }
+};
 
 /*
   Update Account Details

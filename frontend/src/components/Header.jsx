@@ -1,12 +1,24 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Menu, Settings, LogOut, UserCircle } from "lucide-react";
+import axios from "axios";
 
 const Header = ({ onToggleSidebar }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const profileRef = useRef(null);
 
-  
   useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/api/v1/users/me", { withCredentials: true });
+        setUser(response.data);
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      }
+    };
+
+    fetchUser();
+
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
@@ -42,12 +54,15 @@ const Header = ({ onToggleSidebar }) => {
             className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-800 transition-colors duration-200"
           >
             <img
-              src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=150"
+              src={
+                user?.image ||
+                "https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=150"
+              }
               alt="Profile"
               className="h-10 w-10 rounded-full border-2 border-purple-400"
             />
             <span className="text-gray-300 font-medium hidden md:block">
-              John Doe
+              {user?.fullName || "Loading..."}
             </span>
           </button>
 
@@ -55,8 +70,10 @@ const Header = ({ onToggleSidebar }) => {
             <div className="absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-xl py-2 z-50">
               {/* User Info */}
               <div className="px-4 py-3 border-b border-gray-700">
-                <p className="text-sm font-medium text-white">John Doe</p>
-                <p className="text-xs text-gray-400">john.doe@example.com</p>
+                <p className="text-sm font-medium text-white">
+                  {user?.fullName || "Guest"}
+                </p>
+                <p className="text-xs text-gray-400">{user?.email || ""}</p>
               </div>
 
               {/* Dropdown Items */}

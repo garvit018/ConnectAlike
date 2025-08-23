@@ -4,7 +4,8 @@ import uploadOnCloudinary from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
-import { sendMail } from "../utils/nodemailer.util.js";
+import { sendMail } from "../utils/nodeMailer.js"
+// import SendmailTransport from "nodemailer/lib/sendmail-transport/index.js";
 
 /*
   Generate access Tokens
@@ -119,9 +120,14 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const options = {
     httpOnly: true,
-    // secure: true,
+    secure: false,
     // sameSite: "strict",
   };
+  await sendMail(
+    user.email,
+    "Login Notification 🔑",
+    `Hi ${user.fullName}, you just logged in at ${new Date().toLocaleString()}. If this wasn't you, please reset your password immediately.`
+  );
 
   return res
     .status(200)

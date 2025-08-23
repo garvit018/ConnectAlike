@@ -10,6 +10,7 @@ import {
   Star,
   TrendingUp,
   Clock,
+  X, // Close icon
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -38,10 +39,21 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-gray-900/95 backdrop-blur-sm border-r border-gray-800 transform transition-transform duration-300 z-50 overflow-y-auto ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 lg:static lg:z-auto`}
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-900/95 backdrop-blur-sm border-r border-gray-800 transform transition-transform duration-300 z-50 overflow-y-auto
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        lg:translate-x-0 lg:static lg:z-auto`}
       >
+        {/* Close button (mobile only) */}
+        <div className="flex justify-end lg:hidden p-4">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-gray-800 transition"
+          >
+            <X className="h-6 w-6 text-gray-300" />
+          </button>
+        </div>
+
+        {/* Nav items */}
         <nav className="p-4">
           <div className="space-y-2">
             {genres.map((genre) => {
@@ -49,6 +61,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               return (
                 <button
                   key={genre.name}
+                  onClick={onClose} // 👈 close sidebar when item clicked
                   className="w-full flex items-center justify-between px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all duration-200 group"
                 >
                   <div className="flex items-center space-x-3">

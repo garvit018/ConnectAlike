@@ -125,15 +125,29 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen flex bg-black text-white">
-      {/* Sidebar */}
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+    <div className="min-h-screen flex flex-col bg-black text-white">
+      {/* Header */}
+      <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <div className="flex flex-1">
+        {/* Sidebar (slides in/out) */}
+        <div
+          className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-gray-900 transition-transform duration-300 
+          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        >
+          <Sidebar onClose={() => setIsSidebarOpen(false)} />
+        </div>
 
-        <main className="p-6">
+        {/* Overlay for mobile */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          ></div>
+        )}
+
+        {/* Main Content */}
+        <main className="flex-1 p-6 ml-0 lg:ml-0">
           {/* Hero Section */}
           <div className="mb-12 rounded-2xl bg-gradient-to-r from-purple-700/70 to-indigo-700/70 p-10 text-center">
             <h2 className="text-5xl font-bold mb-4">Welcome Back!</h2>
@@ -148,7 +162,7 @@ const Dashboard = () => {
           </div>
 
           {/* Featured Movies */}
-          <section className="mb-12">
+          <section>
             <div className="flex items-center space-x-3 mb-6">
               <Star className="h-6 w-6 text-yellow-400" />
               <h3 className="text-2xl font-bold">Featured Movies</h3>
@@ -159,32 +173,7 @@ const Dashboard = () => {
               ))}
             </div>
           </section>
-
-          {/* Trending Now */}
-          <section className="mb-12">
-            <div className="flex items-center space-x-3 mb-6">
-              <TrendingUp className="h-6 w-6 text-purple-400" />
-              <h3 className="text-2xl font-bold">Trending Now</h3>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-              {trendingMovies.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} />
-              ))}
-            </div>
-          </section>
-
-          {/* Recently Added */}
-          <section>
-            <div className="flex items-center space-x-3 mb-6">
-              <Clock className="h-6 w-6 text-blue-400" />
-              <h3 className="text-2xl font-bold">Recently Added</h3>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-              {recentMovies.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} />
-              ))}
-            </div>
-          </section>
+          
         </main>
       </div>
     </div>

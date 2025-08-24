@@ -4,6 +4,7 @@ import Login from "../pages/Login.jsx";
 import LandingPage from "../pages/LandingPage.jsx";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
+import AboutUs from "../components/AboutUs.jsx";
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -16,6 +17,7 @@ const AppRoutes = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Login />} />
+      <Route path="/about_us" element={<AboutUs />} />
 
       {/* Default redirects */}
       <Route path="*" element={<Navigate to="/login" replace />} />

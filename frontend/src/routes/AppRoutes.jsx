@@ -6,7 +6,6 @@ import {
   Navigate,
 } from "react-router-dom";
 import Login from "../pages/Login.jsx";
-import Dashboard from "../components/Dashboard.jsx";
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -19,15 +18,6 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Login />} />
-        {/* Protected route */}
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>  
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
 
         {/* Default redirects */}
         <Route path="/" element={<Navigate to="/login" replace />} />

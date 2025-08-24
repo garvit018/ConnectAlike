@@ -31,7 +31,95 @@ const userSchema = new Schema(
     },
     image: {
       type: String,
+      default:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToK4qEfbnd-RN82wdL2awn_PMviy_pelocqQ",
     },
+    githubLink: {
+      type: String,
+      default: "",
+    },
+    linkedinLink: {
+      type: String,
+      default: "",
+    },
+    portFolioLink: {
+      type: String,
+      default: "",
+    },
+    skillsLearned: [
+      {
+        type: String,
+        default: "",
+      },
+    ],
+    skillsNeedToLearn: [
+      {
+        type: String,
+        default: "",
+      },
+    ],
+    bio: {
+      type: String,
+      default: "",
+    },
+    education: [
+      {
+        institution: {
+          type: String,
+          default: "",
+        },
+        degree: {
+          type: String,
+          default: "",
+        },
+        startYear: {
+          type: Date,
+          default: null,
+        },
+        endYear: {
+          type: Date,
+          default: null,
+        },
+        CGPA: {
+          type: Number,
+          default: 0,
+        },
+        description: {
+          type: String,
+          default: "",
+        },
+      },
+    ],
+    projects: [
+      {
+        title: {
+          type: String,
+          default: "",
+        },
+        description: {
+          type: String,
+          default: "",
+        },
+        projectLink: {
+          type: String,
+          default: "",
+        },
+        techStack: [
+          {
+            type: String,
+            default: "",
+          },
+        ],
+        startDate: {
+          type: Date,
+          default: null,
+        },
+        endDate: {
+          type: Date,
+          default: null,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

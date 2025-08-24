@@ -70,6 +70,7 @@ const Login = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:8000/api/v1/users/google";
   };
@@ -99,7 +100,7 @@ const Login = () => {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-      console.log("Success:", res.data);
+
       setMessage(
         res.data.message ||
           (isLogin ? "Login successful!" : "Registered successful!")
@@ -108,12 +109,10 @@ const Login = () => {
       const token = res.data?.data?.accessToken;
 
       if (token) {
-        console.log("Token received:", token);
         localStorage.setItem("token", token);
         navigate("/dashboard");
       }
     } catch (err) {
-      console.error("Error:", err.response?.data || err.message);
       setMessage(err.response?.data?.error || "Something went wrong");
       setStatus("error");
     } finally {
@@ -147,18 +146,18 @@ const Login = () => {
     : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-black to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#0d0d0d] via-black to-[#1a1a1a] flex items-center justify-center p-4">
       <div className="w-full max-w-md relative">
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
+        <div className="bg-[#111111] border border-[#E50914] rounded-3xl p-8 shadow-2xl">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-black text-white rounded-full mb-4 shadow-lg">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#E50914] text-white rounded-full mb-4 shadow-lg">
               <Lock className="w-8 h-8" />
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">
               {isLogin ? "Welcome Back" : "Create Account"}
             </h1>
-            <p className="text-gray-300">
+            <p className="text-gray-400">
               {isLogin
                 ? "Sign in to your account"
                 : "Join us today and get started"}
@@ -167,22 +166,19 @@ const Login = () => {
 
           {/* Social Login */}
           <div className="space-y-3 mb-6">
-            <button className="w-full flex items-center justify-center gap-3 bg-black text-white hover:bg-gray-800 py-3 px-4 rounded-xl transition-all duration-200 shadow">
+            <button className="w-full flex items-center justify-center gap-3 bg-[#1c1c1c] text-white hover:bg-[#E50914] py-3 px-4 rounded-xl transition-all duration-200 shadow">
               <Github className="w-5 h-5" />
               <span>Continue with GitHub</span>
             </button>
             <div className="flex gap-3">
-              {/* <a */}
               <button
                 onClick={handleGoogleLogin}
-                className="flex-1 flex items-center justify-center gap-2 bg-black text-white hover:bg-gray-800 py-3 px-4 rounded-xl transition-all duration-200 shadow"
+                className="flex-1 flex items-center justify-center gap-2 bg-[#1c1c1c] text-white hover:bg-[#E50914] py-3 px-4 rounded-xl transition-all duration-200 shadow"
               >
-                {/* > */}
                 <Chrome className="w-4 h-4" />
                 <span className="text-sm">Google</span>
-                {/* </a> */}
               </button>
-              <button className="flex-1 flex items-center justify-center gap-2 bg-black text-white hover:bg-gray-800 py-3 px-4 rounded-xl transition-all duration-200 shadow">
+              <button className="flex-1 flex items-center justify-center gap-2 bg-[#1c1c1c] text-white hover:bg-[#E50914] py-3 px-4 rounded-xl transition-all duration-200 shadow">
                 <Facebook className="w-4 h-4" />
                 <span className="text-sm">Facebook</span>
               </button>
@@ -192,10 +188,10 @@ const Login = () => {
           {/* Divider */}
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-600"></div>
+              <div className="w-full border-t border-gray-700"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-transparent text-gray-400">
+              <span className="px-4 bg-[#111111] text-gray-500">
                 or continue with email
               </span>
             </div>
@@ -215,8 +211,8 @@ const Login = () => {
                     onChange={(e) =>
                       handleInputChange("fullName", e.target.value)
                     }
-                    className={`w-full bg-white/10 border ${
-                      errors.fullName ? "border-red-500" : "border-white/20"
+                    className={`w-full bg-[#1a1a1a] border ${
+                      errors.fullName ? "border-red-500" : "border-gray-700"
                     } text-white placeholder-gray-400 py-4 pl-12 pr-4 rounded-xl focus:outline-none`}
                   />
                 </div>
@@ -234,8 +230,8 @@ const Login = () => {
                     onChange={(e) =>
                       handleInputChange("username", e.target.value)
                     }
-                    className={`w-full bg-white/10 border ${
-                      errors.username ? "border-red-500" : "border-white/20"
+                    className={`w-full bg-[#1a1a1a] border ${
+                      errors.username ? "border-red-300" : "border-gray-700"
                     } text-white placeholder-gray-400 py-4 pl-12 pr-4 rounded-xl focus:outline-none`}
                   />
                 </div>
@@ -254,7 +250,9 @@ const Login = () => {
                   placeholder="Email Address"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  className={`w-full bg-white/10 border ${errors.email ? "border-red-500" : "border-white/20"} text-white placeholder-gray-400 py-4 pl-12 pr-4 rounded-xl focus:outline-none`}
+                  className={`w-full bg-[#1a1a1a] border ${
+                    errors.email ? "border-red-300" : "border-gray-700"
+                  } text-white placeholder-gray-400 py-4 pl-12 pr-4 rounded-xl focus:outline-none`}
                 />
               </div>
               {errors.email && (
@@ -273,7 +271,9 @@ const Login = () => {
                   onChange={(e) =>
                     handleInputChange("password", e.target.value)
                   }
-                  className={`w-full bg-white/10 border ${errors.password ? "border-red-500" : "border-white/20"} text-white placeholder-gray-400 py-4 pl-12 pr-12 rounded-xl focus:outline-none`}
+                  className={`w-full bg-[#1a1a1a] border ${
+                    errors.password ? "border-red-300" : "border-gray-700"
+                  } text-white placeholder-gray-400 py-4 pl-12 pr-12 rounded-xl focus:outline-none`}
                 />
                 <button
                   type="button"
@@ -296,7 +296,13 @@ const Login = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Password Strength</span>
                     <span
-                      className={`${passwordStrength.strength >= 75 ? "text-green-400" : passwordStrength.strength >= 50 ? "text-yellow-400" : "text-red-400"}`}
+                      className={`${
+                        passwordStrength.strength >= 75
+                          ? "text-green-400"
+                          : passwordStrength.strength >= 50
+                          ? "text-yellow-400"
+                          : "text-red-400"
+                      }`}
                     >
                       {passwordStrength.label}
                     </span>
@@ -323,7 +329,9 @@ const Login = () => {
                     onChange={(e) =>
                       handleInputChange("confirmPassword", e.target.value)
                     }
-                    className={`w-full bg-white/10 border ${errors.confirmPassword ? "border-red-500" : "border-white/20"} text-white placeholder-gray-400 py-4 pl-12 pr-12 rounded-xl focus:outline-none`}
+                    className={`w-full bg-[#1a1a1a] border ${
+                      errors.confirmPassword ? "border-red-300" : "border-gray-700"
+                    } text-white placeholder-gray-400 py-4 pl-12 pr-12 rounded-xl focus:outline-none`}
                   />
                   <button
                     type="button"
@@ -353,13 +361,13 @@ const Login = () => {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 text-black bg-white/10 border-white/20 rounded focus:ring-black"
+                    className="w-4 h-4 text-[#bc0710] bg-[#1a1a1a] border-gray-700 rounded focus:ring-[#E50914]"
                   />
                   <span className="text-sm text-gray-300">Remember me</span>
                 </label>
                 <button
                   type="button"
-                  className="text-sm text-gray-400 hover:text-white"
+                  className="text-sm text-gray-400 hover:text-[#E50914]"
                 >
                   Forgot password?
                 </button>
@@ -370,7 +378,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-black text-white hover:bg-gray-800 py-4 px-6 rounded-xl font-semibold shadow transition-all duration-200 disabled:opacity-70 flex items-center justify-center gap-2"
+              className="w-full bg-[#6d0308] text-white hover:bg-[#f31520] py-4 px-6 rounded-xl font-semibold shadow transition-all duration-200 disabled:opacity-70 flex items-center justify-center gap-2 cursor-pointer"
             >
               {isLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -394,11 +402,11 @@ const Login = () => {
 
           {/* Toggle Auth */}
           <div className="text-center mt-6">
-            <p className="text-gray-300">
+            <p className="text-gray-400">
               {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
               <button
                 onClick={toggleMode}
-                className="text-white bg-black px-3 py-1 rounded-lg shadow hover:bg-gray-700 font-semibold"
+                className="text-[#6e070c] hover:text-white font-semibold"
               >
                 {isLogin ? "Sign Up" : "Sign In"}
               </button>
@@ -406,7 +414,7 @@ const Login = () => {
           </div>
         </div>
 
-        <div className="text-center mt-6 text-gray-400 text-sm">
+        <div className="text-center mt-6 text-gray-500 text-sm">
           <p>🔒 Your information is secure and encrypted</p>
         </div>
       </div>

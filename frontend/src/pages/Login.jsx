@@ -10,8 +10,9 @@ import {
   Chrome,
   Facebook,
 } from "lucide-react";
-import axios from "axios";
+import axios from "axios";  
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../util/UserContext.jsx";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const Login = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const { setUser } = useUser();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -107,9 +109,12 @@ const Login = () => {
       );
       setStatus("success");
       const token = res.data?.data?.accessToken;
+      const userData = res.data?.data?.user;
 
-      if (token) {
+      if (userData && token) {
         localStorage.setItem("token", token);
+        localStorage.setItem("userInfo", JSON.stringify(userData));
+        setUser(userData);
         navigate("/dashboard");
       }
     } catch (err) {
@@ -300,8 +305,8 @@ const Login = () => {
                         passwordStrength.strength >= 75
                           ? "text-green-400"
                           : passwordStrength.strength >= 50
-                          ? "text-yellow-400"
-                          : "text-red-400"
+                            ? "text-yellow-400"
+                            : "text-red-400"
                       }`}
                     >
                       {passwordStrength.label}
@@ -330,7 +335,9 @@ const Login = () => {
                       handleInputChange("confirmPassword", e.target.value)
                     }
                     className={`w-full bg-[#1a1a1a] border ${
-                      errors.confirmPassword ? "border-red-300" : "border-gray-700"
+                      errors.confirmPassword
+                        ? "border-red-300"
+                        : "border-gray-700"
                     } text-white placeholder-gray-400 py-4 pl-12 pr-12 rounded-xl focus:outline-none`}
                   />
                   <button

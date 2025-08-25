@@ -31,16 +31,90 @@ const generateAccessandRefreshToken = async (userId) => {
   Register User
 */
 const registerUser = asyncHandler(async (req, res) => {
-  const { fullName, username, email, password } = req.body;
-
+  const {
+    name,
+    email,
+    username,
+    linkedinLink,
+    githubLink,
+    portfolioLink,
+    skillsProficientAt,
+    skillsToLearn,
+    education,
+    bio,
+    projects,
+  } = req.body;
   if (
-    [fullName, username, email, password].some(
-      (field) => !field || field.trim() === ""
-    )
+    !name ||
+    !email ||
+    !username ||
+    skillsProficientAt.length === 0 ||
+    skillsToLearn.length === 0
   ) {
-    throw new ApiError(400, "All fields are required");
+    throw new ApiError(400, "Please upload all the details");
   }
-
+  if (!email.match(/^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/)) {
+    throw new ApiError(400, "Please write valid email");
+  }
+  if (username.length < 3) {
+    throw new ApiError(400, "Username should be atleast 3 characters long");
+  }
+  if (githubLink === "" && linkedinLink === "" && portfolioLink === "") {
+    throw new ApiError(400, "Please upload atleast one link");
+  }
+  const githubRegex =
+    /^(?:http(?:s)?:\/\/)?(?:www\.)?github\.com\/[a-zA-Z0-9_-]+(?:\/)?$/;
+  const linkedinRegex =
+    /^(?:http(?:s)?:\/\/)?(?:www\.)?linkedin\.com\/in\/[a-zA-Z0-9_-]+(?:\/)?$/;
+  if (
+    (linkedinLink && !linkedinLink.match(linkedinRegex)) ||
+    (githubLink && !githubLink.match(githubRegex))
+  ) {
+    throw new ApiError(400, "Please provide valid github and linkedin links");
+  }
+  if (education.length === 0) {
+    throw new ApiError(400, "Education is required");
+  }
+  education.forEach((edu) => {
+    if (!edu.institution || !edu.degree) {
+      throw new ApiError(400, "Please provide all the details");
+    }
+    if (
+      !edu.startDate ||
+      !edu.endDate ||
+      !edu.score ||
+      edu.score < 0 ||
+      edu.score > 100 ||
+      edu.startDate > edu.endDate
+    ) {
+      throw new ApiError(400, "Please provide valid score and dates");
+    }
+  });
+  if (!bio) {
+    throw new ApiError(400, "Bio is required");
+  }
+  if (bio.length > 500) {
+    throw new ApiError(400, "Bio should be less than 500 characters");
+  }
+  if (projects.size > 0) {
+    projects.forEach((project) => {
+      if (
+        !project.title ||
+        !project.description ||
+        !project.projectLink ||
+        !project.startDate ||
+        !project.endDate
+      ) {
+        throw new ApiError(400, "Please provide all the details");
+      }
+      if (project.projectLink.match(/^(http|https):\/\/[^ "]+$/)) {
+        throw new ApiError(400, "Please provide valid project link");
+      }
+      if (project.startDate > project.endDate) {
+        throw new ApiError(400, "Please provide valid dates");
+      }
+    });
+  }
   const existedUser = await User.findOne({
     $or: [{ username }, { email }],
   });
@@ -56,11 +130,18 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const user = await User.create({
-    fullName,
-    image: imageUrl,
-    email,
-    password,
+    name: name,
+    email: email,
     username: username ? username.toLowerCase() : undefined,
+    linkedinLink: linkedinLink,
+    githubLink: githubLink,
+    portfolioLink: portfolioLink,
+    skillsProficientAt: skillsProficientAt,
+    skillsToLearn: skillsToLearn,
+    education: education,
+    bio: bio,
+    projects: projects,
+    picture: req.user.picture,
   });
 
   const createdUser = await User.findById(user._id).select(
@@ -70,17 +151,14 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!createdUser) {
     throw new ApiError(500, "Something went wrong while registering user");
   }
-
-  try {
-    await sendMail(
-      createdUser.email,
-      "Welcome to MovieMate 🎬",
-      `Hello ${createdUser.fullName}, welcome to our family!`
-    );
-  } catch (err) {
-    console.error("❌ Mail error (ignored):", err.message);
-  }
-
+  const jwtToken = generateJWTToken_username(user);
+  const expiryDate = new Date(Date.now() + 1 * 60 * 60 * 1000);
+  res.cookie("accessToken", jwtToken, {
+    httpOnly: true,
+    expires: expiryDate,
+    secure: false,
+  });
+  res.clearCookie("accessTokenRegistration");
   return res
     .status(201)
     .json(new ApiResponse(201, createdUser, "User registered successfully"));

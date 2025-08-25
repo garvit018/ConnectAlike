@@ -32,24 +32,24 @@ const generateAccessandRefreshToken = async (userId) => {
 */
 const registerUser = asyncHandler(async (req, res) => {
   const {
-    name,
+    fullName,
     email,
     username,
     linkedinLink,
     githubLink,
     portfolioLink,
-    skillsProficientAt,
-    skillsToLearn,
+    skillsLearned,
+    skillsNeedToLearn,
     education,
     bio,
     projects,
   } = req.body;
   if (
-    !name ||
+    !fullName ||
     !email ||
     !username ||
-    skillsProficientAt.length === 0 ||
-    skillsToLearn.length === 0
+    skillsLearned.length === 0 ||
+    skillsNeedToLearn.length === 0
   ) {
     throw new ApiError(400, "Please upload all the details");
   }
@@ -130,14 +130,14 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const user = await User.create({
-    name: name,
+    fullName: fullName,
     email: email,
     username: username ? username.toLowerCase() : undefined,
     linkedinLink: linkedinLink,
     githubLink: githubLink,
     portfolioLink: portfolioLink,
-    skillsProficientAt: skillsProficientAt,
-    skillsToLearn: skillsToLearn,
+    skillsLearned: skillsLearned,
+    skillsNeedToLearn: skillsNeedToLearn,
     education: education,
     bio: bio,
     projects: projects,
@@ -165,10 +165,161 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 /*
+  Update Registered User
+*/
+const updateRegisterUser = asyncHandler(async (req, res) => {
+  const {
+    fullName,
+    username,
+    email,
+    linkedinLink,
+    githubLink,
+    portfolioLink,
+    skillsLearned,
+    skillsNeedToLearn,
+    picture,
+  } = req.body;
+  if (
+    !fullName ||
+    !username ||
+    skillsLearned.length === 0 ||
+    skillsNeedToLearn.length === 0
+  ) {
+    throw new ApiError(400, "Please provide all the details");
+  }
+  if (username.length < 3) {
+    throw new ApiError(400, "Username should be atleast 3 characters long");
+  }
+
+  if (githubLink === "" && linkedinLink === "" && portfolioLink === "") {
+    throw new ApiError(400, "Please provide atleast one link");
+  }
+  const newGithub =
+    /^(?:http(?:s)?:\/\/)?(?:www\.)?github\.com\/[a-zA-Z0-9_-]+(?:\/)?$/;
+  const newLinkedin =
+    /^(?:http(?:s)?:\/\/)?(?:www\.)?linkedin\.com\/in\/[a-zA-Z0-9_-]+(?:\/)?$/;
+  if (
+    (linkedinLink && !linkedinLink.match(newLinkedin)) ||
+    (githubLink && !githubLink.match(newGithub))
+  ) {
+    throw new ApiError(400, "Please provide valid github and linkedin links");
+  }
+  const user = await User.findOneAndUpdate(
+    { username: req.user.username },
+    {
+      fullName: fullName,
+      username: username,
+      linkedinLink: linkedinLink,
+      githubLink: githubLink,
+      portfolioLink: portfolioLink,
+      skillsLearned: skillsLearned,
+      skillsNeedToLearn: skillsNeedToLearn,
+      picture: picture,
+    }
+  );
+  if (!user) {
+    throw new ApiError(500, "Error in saving user details");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User saved successfully"));
+});
+
+/*
+  update Education
+*/
+
+const updateEducation = asyncHandler(async (req, res) => {
+  const { education } = req.body;
+  if (education.length == 0) {
+    throw new ApiError(400, "Update valid Education");
+  }
+
+  education.forEach((edu) => {
+    if (
+      !edu.institution ||
+      !edu.degree ||
+      !edu.startDate ||
+      !edu.endDate ||
+      edu.CGPA < 0 ||
+      edu.CGPA > 10 ||
+      edu.startYear > edu.endYear
+    ) {
+      throw new ApiError(400, "Valid Details required");
+    }
+  });
+  const user = await User.findOneAndUpdate(
+    { username: req.user.username },
+    { education: education }
+  );
+  if (!user) {
+    throw new ApiError(401, "Update Valid details of User");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(300, user, "updated Education details"));
+});
+
+/*
+  Update Project and Bio details
+*/
+
+const updateProjectAndBio = asyncHandler(async (req, res) => {
+  const { projects, bio } = req.body;
+  if (!bio) {
+    throw new ApiError(400, "Bio is required");
+  }
+  if (bio.length > 400) {
+    throw new ApiError(401, "Bio should be less than 400 characters");
+  }
+  if (projects.size > 0) {
+    projects.forEach((project) => {
+      if (
+        !project.title ||
+        !project.description ||
+        !project.projectLink ||
+        !project.startDate ||
+        !project.endDate
+      ) {
+        throw new ApiError(400, "Details are required");
+      }
+      if (project.startDate > project.endDate) {
+        throw new ApiError(400, "Enter valid Date");
+      }
+      if (project.projectLink.match(/^(http|https):\/\/[^ "]+$/)) {
+        throw new ApiError(400, "Please provide valid project link");
+      }
+    });
+  }
+  const user = await User.findOneAndUpdate(
+    { username: req.user.username },
+    { bio: bio, projects: projects }
+  );
+  if (!user) {
+    throw new ApiError(500, "Bio and Project not updated");
+  }
+  return res
+    .status(200)
+    .json(200, user, "Bio and project Updated successfully");
+});
+
+/*
   Login User
 */
 const loginUser = asyncHandler(async (req, res) => {
-  const { email, username, password } = req.body;
+  const {
+    fullName,
+    email,
+    username,
+    linkedinLink,
+    githubLink,
+    portfolioLink,
+    skillsLearned,
+    skillsNeedToLearn,
+    education,
+    bio,
+    projects,
+  } = req.body;
 
   if (!username && !email) {
     throw new ApiError(400, "Username or email is required");

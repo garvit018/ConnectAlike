@@ -29,7 +29,7 @@ const userSchema = new Schema(
       trim: true,
       index: true,
     },
-    image: {
+    picture: {
       type: String,
       default:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToK4qEfbnd-RN82wdL2awn_PMviy_pelocqQ",

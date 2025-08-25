@@ -542,4 +542,7 @@ export {
   updateAccountDetails,
   generateAccessandRefreshToken,
   updateUserImage,
+  updateProjectAndBio,
+  updateEducation,
+  updateRegisterUser,
 };

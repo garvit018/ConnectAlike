@@ -71,11 +71,15 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Something went wrong while registering user");
   }
 
-  await sendMail(
-    createdUser.email,
-    "Welcome to MovieMate 🎬",
-    `Hello ${createdUser.fullName}, welcome to our family!`
-  );
+  try {
+    await sendMail(
+      createdUser.email,
+      "Welcome to MovieMate 🎬",
+      `Hello ${createdUser.fullName}, welcome to our family!`
+    );
+  } catch (err) {
+    console.error("❌ Mail error (ignored):", err.message);
+  }
 
   return res
     .status(201)
@@ -123,11 +127,15 @@ const loginUser = asyncHandler(async (req, res) => {
     secure: false,
     sameSite: "lax",
   };
-  await sendMail(
-    user.email,
-    "Login Notification 🔑",
-    `Hi ${user.fullName}, you just logged in at ${new Date().toLocaleString()}. If this wasn't you, please reset your password immediately.`
-  );
+  try {
+    await sendMail(
+      user.email,
+      "Login Notification 🔑",
+      `Hi ${user.fullName}, you just logged in at ${new Date().toLocaleString()}. If this wasn't you, please reset your password immediately.`
+    );
+  } catch (err) {
+    console.error("❌ Mail error (ignored):", err.message);
+  }
 
   return res
     .status(200)

@@ -4,7 +4,7 @@ import {
   logoutUser,
   registerUser,
   refreshAccessToken,
-  getCurrentUser
+  getCurrentUser,
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -27,7 +27,7 @@ router.route("/login").post(loginUser);
 
 router.route("/me").get(verifyJWT, getCurrentUser);
 router.route("/logout").post(verifyJWT, logoutUser);
-
+router.route("register/getDetails").get(verifyJWT, getCurrentUser);
 router.route("/refresh-token").post(refreshAccessToken);
 
 router.get(
@@ -42,14 +42,15 @@ router.get(
       const { accessToken, refreshToken } = await generateAccessandRefreshToken(
         req.user._id
       );
-
       const options = { httpOnly: true };
       res
         .cookie("accessToken", accessToken, options)
         .cookie("refreshToken", refreshToken, options)
         .redirect(`${process.env.FRONTEND_URL}`);
     } catch (err) {
-      res.status(500).json({ message: "Something went wrong", error: err });
+      res
+        .status(500)
+        .redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
     }
   }
 );

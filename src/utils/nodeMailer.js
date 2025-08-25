@@ -1,29 +1,34 @@
 import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
-export const sendMail = async (to, subject, text) => {
+dotenv.config();
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  host: MAILTRAP_SMTP_HOST,
+  port: MAILTRAP_SMTP_PORT,
+  auth: {
+    user: process.env.EMAIL_ID,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
+
+const sendMail = async (to, subject, Message) => {
+  const mailOptions = {
+    from: process.env.EMAIL_ID,
+    to: [to],
+    subject: subject,
+    html: Message,
+  };
+
   try {
-    const transporter = nodemailer.createTransport({
-      host: process.env.MAILTRAP_SMTP_HOST,
-      port: process.env.MAILTRAP_SMTP_PORT,
-      secure: false,
-      auth: {
-        user: process.env.MAILTRAP_SMTP_USER,
-        pass: process.env.MAILTRAP_SMTP_PASS,
-      },
-    });
-
-    const info = await transporter.sendMail({
-      from: '"MovieMailer" <no-reply@movie.com>',
-      to,
-      subject,
-      text,
-      html: "<b>Hello User, we are happy that you joined our family. Kind Regards, MovieMate.</b>",
-    });
-
-    console.log("Message sent:", info.messageId);
-    return info;
+    await transporter.sendMail(mailOptions);
+    console.log("Email sent succesfully");
+    return true;
   } catch (error) {
-    console.error("Mail Error: ", error.message);
-    throw error;
+    console.log("Error while sending  email", error);
+    return false;
   }
 };
+
+export { sendMail };

@@ -10,9 +10,10 @@ import {
   Chrome,
   Facebook,
 } from "lucide-react";
-import axios from "axios";  
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../util/UserContext.jsx";
+import Discover from "./Discover.jsx";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -108,6 +109,7 @@ const Login = () => {
           (isLogin ? "Login successful!" : "Registered successful!")
       );
       setStatus("success");
+      console.log("Backend Response:", res.data);
       const token = res.data?.data?.accessToken;
       const userData = res.data?.data?.user;
 
@@ -115,7 +117,7 @@ const Login = () => {
         localStorage.setItem("token", token);
         localStorage.setItem("userInfo", JSON.stringify(userData));
         setUser(userData);
-        navigate("/dashboard");
+        navigate("/discover");
       }
     } catch (err) {
       setMessage(err.response?.data?.error || "Something went wrong");

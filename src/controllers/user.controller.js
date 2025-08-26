@@ -286,7 +286,9 @@ const updateProjectAndBio = asyncHandler(async (req, res) => {
       if (project.startDate > project.endDate) {
         throw new ApiError(400, "Enter valid Date");
       }
-      if (project.projectLink.match(/^(http|https):\/\/[^ "]+$/)) {
+      try {
+        new URL(project.projectLink);
+      } catch {
         throw new ApiError(400, "Please provide valid project link");
       }
     });
@@ -303,37 +305,44 @@ const updateProjectAndBio = asyncHandler(async (req, res) => {
     .json(200, user, "Bio and project Updated successfully");
 });
 
+/* 
+  Upload Image
+*/
+const uploadImage = asyncHandler(async (req, res) => {
+  const localPath = req.file?.picture[0]?.path;
+  if (!localPath) {
+    throw new ApiError(400, "Image upload failed");
+  }
+  const image = await uploadOnCloudinary(localPath);
+  if (!image) {
+    throw new ApiError(400, "Image upload failed");
+  }
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, { url: image.url }, "Image uploaded successfully")
+    );
+});
+
 /*
   Login User
 */
 const loginUser = asyncHandler(async (req, res) => {
   const {
-    fullName,
     email,
     username,
-    linkedinLink,
-    githubLink,
-    portfolioLink,
-    skillsLearned,
-    skillsNeedToLearn,
-    education,
-    bio,
-    projects,
+    password,
   } = req.body;
 
   if (!username && !email) {
     throw new ApiError(400, "Username or email is required");
   }
-
   let user;
-  if (username && email) {
-    user = await User.findOne({ $or: [{ username }, { email }] });
-  } else if (username) {
+  if (username) {
     user = await User.findOne({ username });
   } else {
     user = await User.findOne({ email });
   }
-
   if (!user) {
     throw new ApiError(404, "User does not exist");
   }
@@ -365,7 +374,6 @@ const loginUser = asyncHandler(async (req, res) => {
   } catch (err) {
     console.error("❌ Mail error (ignored):", err.message);
   }
-
   return res
     .status(200)
     .cookie("accessToken", accessToken, options)
@@ -379,6 +387,7 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
+
 /*
   Logout User 
 */
@@ -390,7 +399,7 @@ const logoutUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     // secure: true,
-    sameSite: "strict",
+    // sameSite: "strict",
   };
 
   return res
@@ -485,31 +494,9 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
-/*
-  Update Account Details
-*/
-const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullName, email } = req.body;
-
-  if (!fullName || !email) {
-    throw new ApiError(400, "All fields are required");
-  }
-
-  const user = await User.findByIdAndUpdate(
-    req.user?._id,
-    { $set: { fullName, email } },
-    { new: true }
-  ).select("-password");
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, user, "Account details updated successfully"));
-});
-
 /* 
   Update User Image
 */
-
 const updateUserImage = asyncHandler(async (req, res) => {
   const localPath = req.file?.path;
   if (!localPath) {
@@ -539,10 +526,10 @@ export {
   refreshAccessToken,
   changeCurrentPassword,
   getCurrentUser,
-  updateAccountDetails,
   generateAccessandRefreshToken,
   updateUserImage,
   updateProjectAndBio,
   updateEducation,
+  uploadImage,
   updateRegisterUser,
 };

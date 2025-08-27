@@ -328,11 +328,7 @@ const uploadImage = asyncHandler(async (req, res) => {
   Login User
 */
 const loginUser = asyncHandler(async (req, res) => {
-  const {
-    email,
-    username,
-    password,
-  } = req.body;
+  const { email, username, password } = req.body;
 
   if (!username && !email) {
     throw new ApiError(400, "Username or email is required");
@@ -386,7 +382,6 @@ const loginUser = asyncHandler(async (req, res) => {
       )
     );
 });
-
 
 /*
   Logout User 
@@ -519,6 +514,86 @@ const updateUserImage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Image updated successfully"));
 });
 
+/*
+  Discover Users
+*/
+
+export const discoverUsers = asyncHandler(async (req, res) => {
+  const webDevSkills = [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "React",
+    "Angular",
+    "Vue",
+    "Node.js",
+    "Express",
+    "MongoDB",
+    "SQL",
+    "NoSQL",
+  ];
+
+  const machineLearningSkills = [
+    "Python",
+    "Natural Language Processing",
+    "Deep Learning",
+    "PyTorch",
+    "Machine Learning",
+  ];
+
+  const users = await User.find({ username: { $ne: req.user.username } });
+
+  if (!users) {
+    throw new ApiError(500, "Error in fetching users");
+  }
+  const shuffled = users.sort(() => Math.random() - 0.5);
+  const usersToLearn = shuffled
+    .filter((u) =>
+      u.skillsProficientAt.some((skill) =>
+        req.user.skillsToLearn.includes(skill)
+      )
+    )
+    .slice(0, 5);
+
+  const webDevUsers = shuffled
+    .filter((u) =>
+      u.skillsProficientAt.some((skill) => webDevSkills.includes(skill))
+    )
+    .slice(0, 5);
+
+  const mlUsers = shuffled
+    .filter((u) =>
+      u.skillsProficientAt.some((skill) =>
+        machineLearningSkills.includes(skill)
+      )
+    )
+    .slice(0, 5);
+
+  const otherUsers = shuffled
+    .filter(
+      (u) =>
+        !usersToLearn.includes(u) &&
+        !webDevUsers.includes(u) &&
+        !mlUsers.includes(u)
+    )
+    .slice(0, 5);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          forYou: usersToLearn,
+          webDev: webDevUsers,
+          ml: mlUsers,
+          others: otherUsers,
+        },
+        "Users fetched successfully"
+      )
+    );
+});
+
 export {
   registerUser,
   loginUser,
@@ -531,5 +606,6 @@ export {
   updateProjectAndBio,
   updateEducation,
   uploadImage,
+  discoverUsers,
   updateRegisterUser,
 };

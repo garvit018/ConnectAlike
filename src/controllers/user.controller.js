@@ -8,6 +8,7 @@ import { Chat } from "../models/chat.model.js";
 import { Message } from "../models/message.model.js";
 import { sendMail } from "../utils/nodeMailer.js";
 import { io } from "../socket/socket.js";
+import {Rating} from "../models/rating.model.js";
 
 /*
   Generate access Tokens
@@ -611,6 +612,9 @@ const requestChat = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, chats, "Chat requested successfully"));
 });
 
+/*
+ Chat History
+*/
 const chatHistory = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
@@ -628,6 +632,9 @@ const chatHistory = asyncHandler(async (req, res) => {
 
 const onlineUsers = {};
 
+/*
+Sending Messages 
+*/
 const sendMessage = asyncHandler(async (req, res) => {
   const { id, content } = req.body;
   if (!id || !content)
@@ -665,6 +672,9 @@ const sendMessage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, message, "Message sent successfully"));
 });
 
+/*
+message received
+*/
 const receivedMessages = asyncHandler(async (req, res) => {
   const id = req.params.id;
   const msg = await Message.find({ chatId: id })
@@ -673,6 +683,27 @@ const receivedMessages = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, msg, "Messages fetched successfully"));
+});
+
+/*
+Rate the User
+*/
+const rateUser = asyncHandler(async (req, res) => {
+  const { username, rating, description } = req.body;
+  if (!username || !rating || !description) {
+    throw new ApiError(400, "Details are required");
+  }
+
+  const newRating = await Rating.create({
+    username,
+    rating,
+    description,
+    rater: req.user._id,
+  });
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, newRating, "User rated successfully"));
 });
 
 export {
@@ -693,4 +724,5 @@ export {
   sendMessage,
   chatHistory,
   receivedMessages,
+  rateUser,
 };

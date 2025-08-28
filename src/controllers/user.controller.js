@@ -4,6 +4,7 @@ import uploadOnCloudinary from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import { Chat } from "../models/chat.model.js";
 import { sendMail } from "../utils/nodeMailer.js";
 // import SendmailTransport from "nodemailer/lib/sendmail-transport/index.js";
 
@@ -518,7 +519,7 @@ const updateUserImage = asyncHandler(async (req, res) => {
   Discover Users
 */
 
-export const discoverUsers = asyncHandler(async (req, res) => {
+const discoverUsers = asyncHandler(async (req, res) => {
   const webDevSkills = [
     "HTML",
     "CSS",
@@ -578,20 +579,50 @@ export const discoverUsers = asyncHandler(async (req, res) => {
     )
     .slice(0, 5);
 
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        forYou: usersToLearn,
+        webDev: webDevUsers,
+        ml: mlUsers,
+        others: otherUsers,
+      },
+      "Users fetched successfully"
+    )
+  );
+});
+
+/*
+  Request Chat
+*/
+const requestChat = asyncHandler(async (req, res) => {
+  const { users } = req.body;
+  if (users.length === 0) {
+    throw new ApiError(400, "User array is empty");
+  }
+  const chats = await Chat.create({ users: users });
+  if (!chats) {
+    throw new ApiError(500, "Failed to create chat");
+  }
+  return res
+    .status(201)
+    .json(new ApiResponse(201, chats, "Chat requested successfully"));
+});
+
+const chatHistory = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const chats = await Chat.find({ users: userId })
+    .populate("users", "username fullName picture")
+    .populate("latestMessage")
+    .sort({ updatedAt: -1 });
+  if (!chats) {
+    throw new ApiError(500, "Failed to fetch chat history");
+  }
   return res
     .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        {
-          forYou: usersToLearn,
-          webDev: webDevUsers,
-          ml: mlUsers,
-          others: otherUsers,
-        },
-        "Users fetched successfully"
-      )
-    );
+    .json(new ApiResponse(200, chats, "Chat history fetched successfully"));
 });
 
 export {
@@ -608,4 +639,6 @@ export {
   uploadImage,
   discoverUsers,
   updateRegisterUser,
+  requestChat,
+  chatHistory,
 };

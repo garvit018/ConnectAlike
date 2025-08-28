@@ -5,8 +5,9 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import { Chat } from "../models/chat.model.js";
+import { Message } from "../models/message.model.js";
 import { sendMail } from "../utils/nodeMailer.js";
-// import SendmailTransport from "nodemailer/lib/sendmail-transport/index.js";
+import { io } from "../socket/socket.js";
 
 /*
   Generate access Tokens
@@ -625,6 +626,55 @@ const chatHistory = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, chats, "Chat history fetched successfully"));
 });
 
+const onlineUsers = {};
+
+const sendMessage = asyncHandler(async (req, res) => {
+  const { id, content } = req.body;
+  if (!id || !content)
+    throw new ApiError(400, "Please provide all the details");
+
+  const senderID = req.user._id;
+  const chat = await Chat.findById(id).populate(
+    "users",
+    "username name email picture"
+  );
+  if (!chat) throw new ApiError(404, "Chat not found");
+
+  if (!chat.users.some((u) => u._id.toString() === senderID.toString())) {
+    throw new ApiError(403, "You are not part of this chat");
+  }
+
+  let message = await Message.create({ chatId: id, sender: senderID, content });
+
+  message = await Message.findById(message._id)
+    .populate("sender", "username name email picture")
+    .populate({
+      path: "chatId",
+      populate: { path: "users", select: "username name email picture" },
+    });
+  await Chat.findByIdAndUpdate(id, { latestMessage: message });
+  const recipient = chat.users.find(
+    (u) => u._id.toString() !== senderID.toString()
+  );
+  const recipientSocketId = onlineUsers[recipient._id.toString()];
+  if (recipientSocketId) {
+    io.to(recipientSocketId).emit("newMessage", message);
+  }
+  return res
+    .status(201)
+    .json(new ApiResponse(201, message, "Message sent successfully"));
+});
+
+const receivedMessages = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  const msg = await Message.find({ chatId: id })
+    .populate("sender", "username name email picture")
+    .populate("id");
+  return res
+    .status(200)
+    .json(new ApiResponse(200, msg, "Messages fetched successfully"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -640,5 +690,7 @@ export {
   discoverUsers,
   updateRegisterUser,
   requestChat,
+  sendMessage,
   chatHistory,
+  receivedMessages,
 };
